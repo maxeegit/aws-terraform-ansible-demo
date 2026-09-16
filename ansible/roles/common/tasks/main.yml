@@ -1,0 +1,11 @@
+---
+- name: Update apt package cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install common packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - unzip
+    state: present

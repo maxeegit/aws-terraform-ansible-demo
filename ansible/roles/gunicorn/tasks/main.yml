@@ -1,0 +1,32 @@
+---
+- name: Create Gunicorn systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/flask-app.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Flask Application with Gunicorn
+      After=network.target
+
+      [Service]
+      User=ubuntu
+      Group=ubuntu
+      WorkingDirectory=/opt/flask-app
+      Environment="PATH=/opt/flask-app/venv/bin"
+      ExecStart=/opt/flask-app/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start Flask application
+  ansible.builtin.systemd:
+    name: flask-app
+    enabled: true
+    state: started

@@ -1,0 +1,11 @@
+---
+- name: Deploy Flask application
+  hosts: web
+  become: true
+
+  roles:
+    - common
+    - python
+    - flask_app
+    - gunicorn
+    - nginx
