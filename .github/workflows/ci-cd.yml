@@ -50,6 +50,9 @@ jobs:
 
       - name: Inspect GitHub OIDC claims
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
+          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         run: |
           echo "Repository: $GITHUB_REPOSITORY"
           echo "Repository ID: $GITHUB_REPOSITORY_ID"
@@ -57,7 +60,9 @@ jobs:
           echo "Repository owner ID: $GITHUB_REPOSITORY_OWNER_ID"
           echo "Ref: $GITHUB_REF"
           echo "Workflow: $GITHUB_WORKFLOW"
-          echo "Event: $GITHUB_EVENT_NAME"    
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "OIDC URL configured: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
+          echo "OIDC request token configured: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+yes}"
 
       - name: Configure AWS credentials
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
