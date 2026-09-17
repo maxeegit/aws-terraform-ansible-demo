@@ -8,9 +8,13 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   ci:
-    name: Build and Test
+    name: Build, Test, Scan and Push
     runs-on: ubuntu-latest
 
     steps:
@@ -35,7 +39,6 @@ jobs:
         run: |
           docker build -t aws-terraform-ansible-demo:ci ./app
 
-
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
@@ -44,3 +47,26 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           severity: CRITICAL,HIGH
+
+      - name: Configure AWS credentials
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::352818908895:role/aws-terraform-ansible-demo-github-actions
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Tag Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag aws-terraform-ansible-demo:ci \
+            352818908895.dkr.ecr.us-east-1.amazonaws.com/aws-terraform-ansible-demo:${{ github.sha }}
+
+      - name: Push Docker image to ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker push \
+            352818908895.dkr.ecr.us-east-1.amazonaws.com/aws-terraform-ansible-demo:${{ github.sha }}
