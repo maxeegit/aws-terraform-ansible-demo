@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-terraform-ansible-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aws-terraform-ansible-demo
+  template:
+    metadata:
+      labels:
+        app: aws-terraform-ansible-demo
+    spec:
+      containers:
+        - name: app
+          image: 352818908895.dkr.ecr.us-east-1.amazonaws.com/aws-terraform-ansible-demo:2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: aws-terraform-ansible-demo
+  labels:
+    app: aws-terraform-ansible-demo
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "80"
+spec:
+  selector:
+    app: aws-terraform-ansible-demo
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+  type: NodePort
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: aws-terraform-ansible-demo
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: aws-terraform-ansible-demo
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

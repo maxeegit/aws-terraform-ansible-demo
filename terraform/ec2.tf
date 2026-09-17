@@ -1,7 +1,6 @@
 data "aws_ami" "ubuntu" {
   most_recent = true
-
-  owners = ["099720109477"]
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
@@ -26,6 +25,11 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [aws_security_group.web.id]
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
+
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
 
   user_data = <<-EOF
               #!/bin/bash
