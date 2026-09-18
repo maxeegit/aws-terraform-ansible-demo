@@ -1,3 +1,4 @@
+By:  Emmanuel Bolarinwa
 # AWS Terraform & Ansible — Cloud DevOps & Security Demo
 
 A hands-on AWS DevOps project demonstrating **Infrastructure as Code, configuration management, containerization, CI/CD, Kubernetes, cloud security, and observability**.
